@@ -3,19 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-linkedlist_t* CreateLinkedList(){
-	linkedlist_t* newList = (linkedlist_t*)malloc(sizeof(linkedlist_t));
-	if (!newList)
-		return NULL;
 
-	newList->head = NULL;
-	newList->size = 0;
-	return newList;
+node_t* CreateNode(char* name, char* surname, char* phone, char* email){
+	node_t* newNode = (node_t*)malloc(sizeof(node_t));
+	if (newNode == NULL){
+		return NULL;}
+
+	memset(newNode, 0, sizeof(node_t));
+	strncpy(newNode->name, name, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
+	strncpy(newNode->surname, surname, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
+	strncpy(newNode->phone, phone, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
+	strncpy(newNode->email, email, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
+
+	return newNode;
 }
 
-void PrintList(linkedlist_t* list){
+void PrintList(node_t* list){
 	int pos = 0;
-	node_t* temp = list->head;
+	node_t* temp = list;
 	while (temp !=NULL){
 		printf("%d: %s\n %s\n %s\n %s\n ************\n", pos, temp->name, temp->surname, temp->phone, temp->email);
 		temp=temp->next;
@@ -23,70 +28,46 @@ void PrintList(linkedlist_t* list){
 	}
 } 
 
-void Append(linkedlist_t* list, char* name, char* surname, char* phone, char* email){
-	//list is empty
-	if (list->head == NULL){
-		node_t* newNode = (node_t*)malloc(sizeof(node_t));
-		if (!newNode)
-			return;
-		memset(newNode, 0, sizeof(node_t));
-		strncpy(newNode->name, name, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-	    strncpy(newNode->surname, surname, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-	    strncpy(newNode->phone, phone, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-	    strncpy(newNode->email, email, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-		newNode->next = NULL;
-		list->head = newNode;
-	}else{
-		node_t* temp = list->head;
-		while(temp->next != NULL){
-			temp=temp->next;
-		}
-		node_t* newNode = (node_t*)malloc(sizeof(node_t));
-		if (!newNode)
-			return;
-		memset(newNode, 0, sizeof(node_t));
-		strncpy(newNode->name, name, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-	    strncpy(newNode->surname, surname, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-	    strncpy(newNode->phone, phone, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-	    strncpy(newNode->email, email, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-		newNode->next = NULL;
-		temp->next = newNode;
+void Append(node_t** list, node_t* newNode){
+	node_t* temp = *list;
+	if (temp == NULL){
+		*list = newNode;
+		return;
 	}
-	list->size++;
+
+	while(temp->next != NULL){
+		temp=temp->next;
+	}
+
+	temp->next = newNode;
+	
+	if (!newNode)
+		return;
 }
 
-void Insert(linkedlist_t* list, char* email, char* phone, char* surname, char* name, int pos){
+void Insert(node_t** list, node_t* newNode, int pos){
 	int cur_pos = 0; 
-	if (pos < 0 || pos > (list->size - 1))
-		return;
 	node_t* prev = NULL;
-	node_t* current = list->head;
+	node_t* current = *list;
+	if (!current && pos == 0) {
+		*list = newNode;
+		return;
+	}
+
 	while(current->next != NULL && cur_pos != pos){
 		prev = current;
 		current=current->next;
 		cur_pos++;
 	}
-	node_t* newNode = (node_t*)malloc(sizeof(node_t));
-	if (!newNode)
-		return;
-	memset(newNode, 0, sizeof(node_t));
-	strncpy(newNode->name, name, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-    strncpy(newNode->surname, surname, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-    strncpy(newNode->phone, phone, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
-    strncpy(newNode->email, email, BUF_SIZE - 1); //tikrinti kopijuojamo stringo ilgi
+
 	prev->next = newNode;
 	newNode->next = current;
-	list->size++;
 }
 
-void DeleteNode(linkedlist_t* list, int pos){
+void DeleteNode(node_t* list, int pos){
 	int cur_pos = 0;
-
-	if (pos < 0 || pos > (list->size - 1))
-		return;
-
 	node_t* prev = NULL;
-	node_t* current = list->head;
+	node_t* current = list;
 	while(current->next != NULL && cur_pos != pos){
 		prev = current;
 		current=current->next;
@@ -95,13 +76,12 @@ void DeleteNode(linkedlist_t* list, int pos){
 
 	prev->next = current->next;
 	free(current);
-	list->size--;
 }
 
-void DeleteList(linkedlist_t* list){
-	node_t* current = list->head; //points to current node
+void DeleteList(node_t** list){
+	node_t* current = *list; //points to current node
 	if (current == NULL){
-		free(list);
+		//free(list);
 		return;
 	}
 
@@ -112,17 +92,14 @@ void DeleteList(linkedlist_t* list){
 		free(current);
 		current = next;
 	}
-	free(list);
+	//free(list);
+	*list = NULL;
 }
 
 
-node_t* FindByIndex(linkedlist_t* list, int pos){
+node_t* FindByIndex(node_t* list, int pos){
 	int cur_pos = 0;
-
-	if (pos < 0 || pos > (list->size - 1))
-		return NULL;
-
-	node_t* current = list->head;
+	node_t* current = list;
 	while (current->next != NULL && cur_pos != pos){
 		current=current->next;
 		cur_pos++;
@@ -131,10 +108,9 @@ node_t* FindByIndex(linkedlist_t* list, int pos){
 	return current;
 }
 
-node_t* FindByValue(linkedlist_t* list, char* criteria) {
+node_t* FindByValue(node_t* list, char* criteria) {
 	int found = 0;
-
-	node_t* current = list->head;
+	node_t* current = list;
 	while(current->next != NULL){
 
 		if (!strcmp(current->name, criteria) ||
@@ -152,4 +128,23 @@ node_t* FindByValue(linkedlist_t* list, char* criteria) {
 		return NULL;
 
 	return current;
+}
+
+int GetSize(node_t* list) {
+	int size = 0;
+	node_t* current = list;
+	if (!current) {
+		return size;
+	}
+
+	while (current->next != NULL){
+		current=current->next;
+		size++;
+	}
+
+	return size;
+}
+
+void PrintNode(node_t* newNode) {
+	 printf("%s\n %s\n %s\n %s\n\n",newNode->name,newNode->surname,newNode->phone,newNode->email);
 }

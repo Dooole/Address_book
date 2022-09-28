@@ -2,36 +2,32 @@
 #define LINKEDLIST_H_INCLUDED
 #define BUF_SIZE 64
 
-//node in a chain
-typedef struct node{
+typedef struct node {
 	char name[BUF_SIZE];
 	char surname[BUF_SIZE];
 	char phone[BUF_SIZE];
 	char email[BUF_SIZE];
 	struct node* next;
-}node_t;
+} node_t;
 
-//linked list data structure wich always holds first node in a chain
-typedef struct linkedlist{
-	int size;
-	node_t* head; //head node
-}linkedlist_t;
+node_t* CreateNode(char* name, char* surname, char* phone, char* email);
 
+void PrintList(node_t* list); //Print all nodes in linked list
 
-linkedlist_t* CreateLinkedList();
-
-void PrintList(linkedlist_t* list); //Print all nodes in linked list
-
-void Append(linkedlist_t* list, char* name, char* surname, char* phone, char* email); //Add node to the end
+void Append(node_t** list, node_t* newNode); //Add node to the end
 	
-void Insert(linkedlist_t* list, char* name, char* surname, char* phone, char* email, int pos); //Insert to specific position in linked list
+void Insert(node_t** list, node_t* newNode, int pos); //Insert to specific position in linked list
 
-void DeleteNode(linkedlist_t* list, int post); //Delete one node
+void DeleteNode(node_t* list, int post); //Delete one node
 
-void DeleteList(linkedlist_t* list); //Delete all nodes in linked list
+void DeleteList(node_t** list); //Delete all nodes in linked list
 
-node_t* FindByIndex(linkedlist_t* list, int pos);
+node_t* FindByIndex(node_t* list, int pos);
 
-node_t* FindByValue(linkedlist_t* list, char* criteria);
+node_t* FindByValue(node_t* list, char* criteria);
+
+void PrintNode(node_t* node);
+
+int GetSize(node_t* node);
 
 #endif
