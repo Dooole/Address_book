@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "linkedlist.h"
+
+static node_t *list = NULL;
 
 int InitialData(node_t** list) {
     node_t *node;
@@ -89,9 +92,18 @@ int ParseIndex(node_t* list) {
     return index;
 }
 
+void int_handler(int sig)
+{
+    if (list)
+        DeleteList(&list);
+
+    exit(1);
+}
+
+
 int main() {
     char criteria[BUF_SIZE];
-    node_t *list = NULL, *node = NULL;
+    node_t *node = NULL;
 
     if (InitialData(&list)) {
         printf("Failed to add initial data\n");
@@ -101,6 +113,8 @@ int main() {
 
     int finish = 0;
     int choose, pos;
+
+    signal(SIGINT, int_handler);
 
     while(!finish)
     {
